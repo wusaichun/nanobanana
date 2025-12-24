@@ -3,6 +3,9 @@ import { stripe } from '@/lib/stripe'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
+
 export async function POST(request: NextRequest) {
   try {
     // 检查Stripe是否已配置
@@ -11,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

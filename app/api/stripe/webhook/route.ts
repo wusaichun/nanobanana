@@ -7,8 +7,11 @@ import { eq, sql } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { createPaymentRecord, PaymentStatus, PaymentType } from '@/lib/payments'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key')
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+export const dynamic = 'force-dynamic'
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest) {
     // 处理支付成功事件（积分购买）
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent
-      
+
       const userId = paymentIntent.metadata.userId
       const points = parseInt(paymentIntent.metadata.points)
       const type = paymentIntent.metadata.type
@@ -84,18 +87,18 @@ export async function POST(request: NextRequest) {
     // 处理订阅相关事件
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session
-      
+
       if (session.mode === 'subscription') {
         const customerId = session.customer as string
         const subscriptionId = session.subscription as string
-        
+
         // 检查是否已经处理过这个checkout session（防重复处理）
         const existingRecord = await db.select().from(stripePayments).where(eq(stripePayments.checkoutSessionId, session.id)).limit(1)
         if (existingRecord.length > 0) {
           console.log(`Checkout session ${session.id} 已经处理过，跳过重复处理`)
           return NextResponse.json({ received: true, message: 'Session already processed' })
         }
-        
+
         try {
           // 获取客户邮箱 - 如果session中没有邮箱，从Stripe获取
           let customerEmail = session.customer_email
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
               console.error('获取客户信息失败:', customerError)
             }
           }
-          
+
           if (!customerEmail) {
             console.error('无法获取客户邮箱:', {
               sessionCustomerEmail: session.customer_email,
@@ -118,15 +121,15 @@ export async function POST(request: NextRequest) {
             })
             return NextResponse.json({ received: true, warning: 'Customer email not found, will retry' })
           }
-          
+
           // 通过邮箱查找用户
           const user = await db.select().from(users).where(eq(users.email, customerEmail)).limit(1)
-          
+
           if (user.length === 0) {
             console.error('未找到用户:', customerEmail)
             return NextResponse.json({ received: true, warning: 'User not found, will retry' })
           }
-          
+
           console.log('找到用户:', {
             userId: user[0].id,
             email: user[0].email,
@@ -138,7 +141,7 @@ export async function POST(request: NextRequest) {
           // 主动使用Stripe SDK获取最新的完整订阅信息
           console.log('获取订阅信息:', subscriptionId)
           const latestSubscription = await stripe.subscriptions.retrieve(subscriptionId)
-          
+
           console.log('获取到的订阅信息:', {
             subscriptionId: latestSubscription.id,
             status: latestSubscription.status,
@@ -152,16 +155,16 @@ export async function POST(request: NextRequest) {
           // 否则从当前时间开始计算30天
           let finalEndDate: Date
           const currentUser = user[0]
-          const hasActiveSubscription = currentUser.subscriptionStatus === 'active' && 
-                                       currentUser.subscriptionCurrentPeriodEnd &&
-                                       currentUser.subscriptionCurrentPeriodEnd > new Date()
-          
+          const hasActiveSubscription = currentUser.subscriptionStatus === 'active' &&
+            currentUser.subscriptionCurrentPeriodEnd &&
+            currentUser.subscriptionCurrentPeriodEnd > new Date()
+
           if (hasActiveSubscription) {
             // 在现有到期时间基础上累加30天
             const currentEndTime = currentUser.subscriptionCurrentPeriodEnd!.getTime()
             const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000
             finalEndDate = new Date(currentEndTime + thirtyDaysInMs)
-            
+
             console.log('用户已有活跃订阅，时间累加:', {
               原到期时间: currentUser.subscriptionCurrentPeriodEnd,
               新到期时间: finalEndDate,
@@ -172,7 +175,7 @@ export async function POST(request: NextRequest) {
             const subscriptionCreated = latestSubscription.created
             const oneMonthLater = subscriptionCreated + (30 * 24 * 60 * 60) // 30天后
             finalEndDate = new Date(oneMonthLater * 1000)
-            
+
             console.log('新订阅或已过期，重新计算:', {
               创建时间: new Date(subscriptionCreated * 1000),
               到期时间: finalEndDate,
@@ -210,7 +213,7 @@ export async function POST(request: NextRequest) {
             points: 10000,
             pointsType: 'gifted',
             action: 'subscription_gift',
-            description: hasActiveSubscription 
+            description: hasActiveSubscription
               ? `续订专业版赠送积分（时间累加30天）`
               : `订阅专业版赠送积分`,
             createdAt: new Date(),
@@ -232,7 +235,7 @@ export async function POST(request: NextRequest) {
             pointsAmount: 10000,
             pointsType: 'gifted',
             productName: '专业版订阅',
-            productDescription: hasActiveSubscription 
+            productDescription: hasActiveSubscription
               ? '续订专业版订阅，赠送10000积分'
               : '订阅专业版，赠送10000积分',
             priceId: latestSubscription.items.data[0]?.price?.id,
@@ -248,7 +251,7 @@ export async function POST(request: NextRequest) {
         // 处理积分购买
         const userId = session.metadata.userId
         const points = parseInt(session.metadata.points)
-        
+
         if (userId && points) {
           try {
             // 更新用户购买积分（永不过期）
@@ -301,35 +304,35 @@ export async function POST(request: NextRequest) {
     // 处理订阅更新事件
     if (event.type === 'customer.subscription.updated') {
       const webhookSubscription = event.data.object as Stripe.Subscription
-      
+
       try {
         // 主动获取最新的订阅信息，而不是使用webhook中的数据
         console.log('订阅更新事件，主动获取最新订阅信息:', webhookSubscription.id)
         const latestSubscription = await stripe.subscriptions.retrieve(webhookSubscription.id)
-        
+
         console.log('获取到的最新订阅更新信息:', {
           subscriptionId: latestSubscription.id,
           status: latestSubscription.status,
           current_period_end: (latestSubscription as any).current_period_end,
-          current_period_end_date: (latestSubscription as any).current_period_end 
-            ? new Date((latestSubscription as any).current_period_end * 1000) 
+          current_period_end_date: (latestSubscription as any).current_period_end
+            ? new Date((latestSubscription as any).current_period_end * 1000)
             : null
         })
 
         // 获取当前用户信息，检查是否需要保持累加逻辑
         const currentUser = await db.select().from(users).where(eq(users.subscriptionId, latestSubscription.id)).limit(1)
-        
+
         if (currentUser.length > 0) {
           const user = currentUser[0]
           let finalEndDate: Date
-          
+
           // 检查是否是续费场景（用户已有活跃订阅且到期时间比Stripe的标准时间更晚）
           const stripeEndDate = new Date((latestSubscription as any).current_period_end * 1000)
           const userCurrentEndDate = user.subscriptionCurrentPeriodEnd
-          
-          if (userCurrentEndDate && 
-              user.subscriptionStatus === 'active' && 
-              userCurrentEndDate > stripeEndDate) {
+
+          if (userCurrentEndDate &&
+            user.subscriptionStatus === 'active' &&
+            userCurrentEndDate > stripeEndDate) {
             // 保持用户的累加时间，不被Stripe覆盖
             finalEndDate = userCurrentEndDate
             console.log('保持累加时间，不被Stripe覆盖:', {
@@ -359,8 +362,8 @@ export async function POST(request: NextRequest) {
             .update(users)
             .set({
               subscriptionStatus: latestSubscription.status,
-              subscriptionCurrentPeriodEnd: (latestSubscription as any).current_period_end 
-                ? new Date((latestSubscription as any).current_period_end * 1000) 
+              subscriptionCurrentPeriodEnd: (latestSubscription as any).current_period_end
+                ? new Date((latestSubscription as any).current_period_end * 1000)
                 : null,
               updatedAt: new Date(),
             })
@@ -374,25 +377,25 @@ export async function POST(request: NextRequest) {
     // 处理订阅取消事件 - 清零赠送积分
     if (event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object as Stripe.Subscription
-      
+
       try {
         // 获取用户当前信息
         const user = await db.select().from(users).where(eq(users.subscriptionId, subscription.id)).limit(1)
-        
+
         if (user.length > 0) {
           const currentUser = user[0]
-          
+
           // 由于每次订阅都会赠送10,000积分，订阅取消时只清零10,000积分
           // 如果用户的赠送积分少于10,000，则清零所有赠送积分
           const pointsToRemove = Math.min(currentUser.giftedPoints || 0, 10000)
-          
+
           console.log('订阅取消，清零积分:', {
             userId: currentUser.id,
             subscriptionId: subscription.id,
             当前赠送积分: currentUser.giftedPoints,
             将要清零积分: pointsToRemove
           })
-          
+
           if (pointsToRemove > 0) {
             // 更新用户状态，清零部分赠送积分
             await db
@@ -440,7 +443,7 @@ export async function POST(request: NextRequest) {
     // 处理支付失败事件
     if (event.type === 'invoice.payment_failed') {
       const invoice = event.data.object as Stripe.Invoice
-      
+
       try {
         await db
           .update(users)

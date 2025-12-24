@@ -4,16 +4,16 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getTranslations } from 'next-intl/server'
 
-export async function generateMetadata({ params }: { params: { locale: string } }) {
+export async function generateMetadata({ params }: { params: any }) {
   const t = await getTranslations({ locale: params.locale, namespace: 'admin.newsletter' })
-  
+
   return {
     title: t('meta_title'),
     description: t('meta_description'),
   }
 }
 
-export default async function NewsletterAdminPage({ params }: { params: { locale: string } }) {
+export default async function NewsletterAdminPage({ params }: { params: any }) {
   // 验证管理员权限
   await requireAdmin()
 

@@ -1,9 +1,9 @@
 export const seoConfig = {
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || '',
-  siteName: 'Get SaaS',
+  siteName: '生财有术',
   defaultLocale: 'zh',
   locales: ['zh', 'en'],
-  
+
   // 默认SEO设置
   defaultSEO: {
     zh: {
@@ -156,11 +156,11 @@ export const seoConfig = {
 export function getPageSEO(page: string, locale: string) {
   const pageSEO = seoConfig.pages[page as keyof typeof seoConfig.pages]
   const defaultSEO = seoConfig.defaultSEO[locale as keyof typeof seoConfig.defaultSEO]
-  
+
   if (pageSEO && pageSEO[locale as keyof typeof pageSEO]) {
     return pageSEO[locale as keyof typeof pageSEO]
   }
-  
+
   return defaultSEO
 }
 

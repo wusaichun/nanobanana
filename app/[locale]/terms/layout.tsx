@@ -4,13 +4,13 @@ import { getTranslations } from 'next-intl/server'
 
 interface TermsLayoutProps {
   children: React.ReactNode
-  params: { locale: string }
+  params: any
 }
 
 export async function generateMetadata({
   params: { locale }
 }: {
-  params: { locale: string }
+  params: any
 }): Promise<Metadata> {
   // 验证 locale 是否有效
   const locales = ['en', 'zh']
@@ -19,7 +19,7 @@ export async function generateMetadata({
   }
 
   const t = await getTranslations({ locale, namespace: 'metadata.terms' })
-  
+
   return {
     title: t('title'),
     description: t('description')

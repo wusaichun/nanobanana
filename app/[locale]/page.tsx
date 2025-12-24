@@ -3,12 +3,15 @@
 import { useEffect } from "react"
 
 import { Navbar } from "@/components/navbar"
-import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
+// import { HeroSection } from "@/components/hero-section"
+import { Hero } from "@/components/landing/hero"
+import { Generator } from "@/components/landing/generator"
+import { Features } from "@/components/landing/features"
+// import { FeaturesSection } from "@/components/features-section"
 import { PricingSection } from "@/components/pricing-section"
-import { Testimonials } from "@/components/testimonials"
+// import { Testimonials } from "@/components/testimonials"
 import { FAQSection } from "@/components/faq-section"
-import { BlogSection } from "@/components/blog-section"
+// import { BlogSection } from "@/components/blog-section"
 import { Footer } from "@/components/footer"
 import { PageBackground } from "@/components/page-background"
 
@@ -32,12 +35,13 @@ export default function ChinesePage() {
 
       <Navbar />
       <main>
-        <HeroSection />
-        <FeaturesSection />
+        <Hero />
+        <Generator />
+        <Features />
         <PricingSection />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <FAQSection />
-        <BlogSection />
+        {/* <BlogSection /> */}
       </main>
       <Footer />
     </PageBackground>

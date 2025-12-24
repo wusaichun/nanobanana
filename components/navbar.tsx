@@ -57,221 +57,164 @@ export function Navbar() {
   return (
     <>
       <DemoBanner />
-      
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="relative w-8 h-8 sm:w-10 sm:h-10">
-                <Image
-                  src="/logo.png"
-                  alt="Get SaaS Logo"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-              <span className="text-xl sm:text-2xl font-bold text-primary">
-                Get SaaS
-              </span>
-            </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => scrollToSection("home")}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:scale-105 transform"
-            >
-              {t("home")}
-            </button>
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:scale-105 transform"
-            >
-              {t("features")}
-            </button>
-            <button
-              onClick={() => scrollToSection("pricing")}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:scale-105 transform"
-            >
-              {t("pricing")}
-            </button>
-            <Link
-              href={getLocalizedPath("/blog")}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium hover:scale-105 transform"
-            >
-              {t("blog")}
-            </Link>
-          </div>
-
-          {/* Right side controls */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Language Switcher */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-secondary transition-all duration-300">
-                  <Globe className="h-4 w-4 mr-2 text-primary" />
-                  {locale === "zh" ? "中" : "EN"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => switchLocale("zh")} className="hover:bg-secondary hover:text-primary">中文</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => switchLocale("en")} className="hover:bg-secondary hover:text-primary">English</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Theme Toggle */}
-            {mounted && (
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="text-muted-foreground hover:text-primary hover:bg-secondary transition-all duration-300">
-                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-primary" />
-                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-primary" />
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-            )}
-
-            {/* Auth Section */}
-            {status === "loading" ? (
-              <div className="w-8 h-8 animate-pulse bg-secondary rounded-full" />
-            ) : session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2 text-muted-foreground hover:text-primary hover:bg-secondary transition-all duration-300">
-                    <User className="h-4 w-4 text-primary" />
-                    <span className="hidden lg:inline">{session.user?.name || session.user?.email}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild className="hover:bg-secondary hover:text-primary">
-                    <Link href={getLocalizedPath("/profile")}>
-                      <User className="mr-2 h-4 w-4 text-primary" />
-                      {t("profile")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="hover:bg-secondary hover:text-primary">
-                    <LogOut className="mr-2 h-4 w-4 text-primary" />
-                    {t("signOut")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary hover:bg-secondary transition-all duration-300">
-                  <Link href={getLocalizedPath("/auth/signin")}>{t("signIn")}</Link>
-                </Button>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 cyber-glow hover:scale-105 transform" asChild>
-                  <Link href={getLocalizedPath("/auth/signup")}>{t("signUp")}</Link>
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-muted-foreground hover:text-primary hover:bg-primary/20 transition-all duration-300">
-              {isMenuOpen ? <X className="h-6 w-6 text-primary" /> : <Menu className="h-6 w-6 text-primary" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-primary/30">
-              <button
-                onClick={() => {
-                  scrollToSection("home")
-                  setIsMenuOpen(false)
-                }}
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-primary/20 rounded-lg transition-all duration-300"
-              >
-                {t("home")}
-              </button>
-              <button
-                onClick={() => {
-                  scrollToSection("features")
-                  setIsMenuOpen(false)
-                }}
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-primary/20 rounded-lg transition-all duration-300"
-              >
-                {t("features")}
-              </button>
-              <button
-                onClick={() => {
-                  scrollToSection("pricing")
-                  setIsMenuOpen(false)
-                }}
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-primary/20 rounded-lg transition-all duration-300"
-              >
-                {t("pricing")}
-              </button>
-              <Link
-                href={getLocalizedPath("/blog")}
-                onClick={() => setIsMenuOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary hover:bg-primary/20 rounded-lg transition-all duration-300"
-              >
-                {t("blog")}
+      <nav className="fixed top-0 z-50 w-full border-b border-primary/30 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60 transition-all duration-300">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center space-x-3 group">
+                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🍌</span>
+                <span className="text-xl sm:text-2xl font-bold text-primary tracking-tight">
+                  nanobanana
+                </span>
               </Link>
+            </div>
 
-              <div className="border-t border-primary/30 pt-4 space-y-2">
-                {/* Auth Section Mobile */}
-                {session ? (
-                  <div className="space-y-2">
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      {session.user?.name || session.user?.email}
-                    </div>
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/20" asChild>
-                      <Link href={getLocalizedPath("/profile")}>
-                        <User className="mr-2 h-4 w-4" />
-                        {t("profile")}
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/20" onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {t("signOut")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Button variant="ghost" size="sm" className="w-full text-foreground hover:text-primary hover:bg-primary/20" asChild>
-                      <Link href={getLocalizedPath("/auth/signin")}>{t("signIn")}</Link>
-                    </Button>
-                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 cyber-glow" asChild>
-                      <Link href={getLocalizedPath("/auth/signup")}>{t("signUp")}</Link>
-                    </Button>
-                  </div>
-                )}
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <button
+                onClick={() => scrollToSection("features")}
+                className="text-gray-300 hover:text-primary transition-colors duration-300 font-medium text-sm uppercase tracking-wider hover:shadow-glow"
+              >
+                核心功能
+              </button>
+              <button
+                onClick={() => scrollToSection("playground")}
+                className="text-gray-300 hover:text-primary transition-colors duration-300 font-medium text-sm uppercase tracking-wider hover:shadow-glow"
+              >
+                核心玩法
+              </button>
+              <button
+                onClick={() => scrollToSection("pricing")}
+                className="text-gray-300 hover:text-primary transition-colors duration-300 font-medium text-sm uppercase tracking-wider hover:shadow-glow"
+              >
+                价格方案
+              </button>
+              <button
+                onClick={() => scrollToSection("faq")}
+                className="text-gray-300 hover:text-primary transition-colors duration-300 font-medium text-sm uppercase tracking-wider hover:shadow-glow"
+              >
+                常见问题
+              </button>
+            </div>
 
-                {/* Controls Mobile */}
-                <div className="flex items-center space-x-2 px-3 py-2">
+            {/* Right side controls */}
+            <div className="hidden md:flex items-center space-x-4">
+
+              {/* Auth Section */}
+              {status === "loading" ? (
+                <div className="w-8 h-8 animate-pulse bg-primary/20 rounded-full" />
+              ) : session ? (
+                <div className="flex items-center gap-4">
+                  <Link href="/dashboard" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                    进入控制台
+                  </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/20 transition-all duration-300">
-                        <Globe className="h-4 w-4 mr-2 text-primary" />
-                        {locale === "zh" ? "中" : "EN"}
+                      <Button variant="ghost" size="sm" className="flex items-center space-x-2 text-gray-300 hover:text-primary hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/30">
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="hidden lg:inline">{session.user?.name || session.user?.email}</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-secondary border-primary/30">
-                      <DropdownMenuItem onClick={() => switchLocale("zh")} className="text-foreground hover:bg-primary/20 hover:text-primary">中文</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => switchLocale("en")} className="text-foreground hover:bg-primary/20 hover:text-primary">English</DropdownMenuItem>
+                    <DropdownMenuContent align="end" className="bg-black/90 border-primary/30 text-gray-200">
+                      <DropdownMenuItem asChild className="hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary cursor-pointer">
+                        <Link href={getLocalizedPath("/profile")}>
+                          <User className="mr-2 h-4 w-4 text-primary" />
+                          {t("profile")}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-primary/20" />
+                      <DropdownMenuItem onClick={handleSignOut} className="hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4 text-primary" />
+                        {t("signOut")}
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  {mounted && (
-                    <Button variant="ghost" size="sm" onClick={toggleTheme} className="text-muted-foreground hover:text-primary hover:bg-primary/20 transition-all duration-300">
-                      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-primary" />
-                      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-primary" />
-                    </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Button variant="ghost" size="sm" asChild className="text-gray-300 hover:text-primary hover:bg-primary/10 transition-all duration-300">
+                    <Link href={getLocalizedPath("/auth/signin")}>{t("signIn")}</Link>
+                  </Button>
+                  <Button className="bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-black transition-all duration-300 font-bold rounded-full px-6" asChild>
+                    <Link href={getLocalizedPath("/auth/signup")}>免费体验</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-primary hover:bg-primary/10">
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden bg-black/95 backdrop-blur border-b border-primary/30 absolute left-0 right-0 top-16 transition-all duration-300">
+              <div className="px-4 pt-2 pb-6 space-y-2">
+                <button
+                  onClick={() => {
+                    scrollToSection("features")
+                    setIsMenuOpen(false)
+                  }}
+                  className="block w-full text-left px-3 py-3 text-base font-medium text-gray-300 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                >
+                  核心功能
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("playground")
+                    setIsMenuOpen(false)
+                  }}
+                  className="block w-full text-left px-3 py-3 text-base font-medium text-gray-300 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                >
+                  核心玩法
+                </button>
+                <button
+                  onClick={() => {
+                    scrollToSection("pricing")
+                    setIsMenuOpen(false)
+                  }}
+                  className="block w-full text-left px-3 py-3 text-base font-medium text-gray-300 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                >
+                  价格方案
+                </button>
+
+                <div className="border-t border-primary/30 pt-4 space-y-3">
+                  {/* Auth Section Mobile */}
+                  {session ? (
+                    <div className="space-y-3">
+                      <div className="px-3 py-2 text-sm text-primary font-bold">
+                        欢迎, {session.user?.name || session.user?.email}
+                      </div>
+                      <Button className="w-full bg-primary text-black hover:bg-primary/90 font-bold" asChild>
+                        <Link href="/dashboard">进入控制台</Link>
+                      </Button>
+                      <Button variant="outline" className="w-full border-primary/50 text-gray-300 hover:text-primary hover:border-primary hover:bg-primary/10" onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        {t("signOut")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 pt-2">
+                      <Button variant="ghost" className="w-full text-gray-300 hover:text-primary hover:bg-primary/10" asChild>
+                        <Link href={getLocalizedPath("/auth/signin")}>{t("signIn")}</Link>
+                      </Button>
+                      <Button className="w-full bg-linear-gradient-primary text-black font-bold" style={{ background: 'linear-gradient(45deg, var(--primary), var(--secondary))' }} asChild>
+                        <Link href={getLocalizedPath("/auth/signup")}>免费体验</Link>
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </nav>
+          )}
+        </div>
+      </nav>
     </>
   )
 }

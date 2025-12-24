@@ -6,14 +6,17 @@ import { users } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock_key', {
+  // apiVersion: '2025-06-30.basil', // Use default SDK version
 })
+
+export const dynamic = 'force-dynamic'
+
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

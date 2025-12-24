@@ -3,6 +3,9 @@ import { stripe, getActualPriceIds } from '@/lib/stripe'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
+
 export async function POST(request: NextRequest) {
   try {
     // 检查Stripe是否已配置
@@ -11,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // 确定要使用的价格ID
     let finalPriceId = priceId
-    
+
     // 如果前端传递的价格ID为空或无效，使用服务端的配置
     if (!priceId || priceId.trim() === '') {
       if (planType === 'pro') {
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest) {
     // 验证locale并构建成功URL
     const validLocales = ['en', 'zh']
     const validLocale = validLocales.includes(locale) ? locale : 'en'
-    
+
     // 创建结账会话
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customer.id,
